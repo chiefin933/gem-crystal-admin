@@ -25,15 +25,26 @@ export const InventoryManager: React.FC = () => {
   }, []);
 
   const handleAdjust = async (variantId: string, delta: number) => {
+    // Require a reason for all adjustments so every change is auditable
+    const defaultReason = delta > 0
+      ? (delta >= 10 ? 'Restock received' : 'Manual stock addition')
+      : 'Manual stock deduction';
+    const reason = window.prompt(
+      `Reason for ${delta > 0 ? `+${delta}` : delta} adjustment:`,
+      defaultReason,
+    );
+    if (reason === null) return; // cancelled
+
     setUpdatingVariantId(variantId);
     try {
-      await adjustVariantStock(variantId, delta);
-      // Update stock locally
+      const res = await adjustVariantStock(variantId, delta, reason.trim() || defaultReason);
+      // Use the DB-verified stock value — never apply a local clamp
+      const newStock = res.data.stockQuantity;
       setProducts(prev =>
         prev.map(p => ({
           ...p,
           variants: p.variants.map((v: any) =>
-            v.id === variantId ? { ...v, stockQuantity: Math.max(0, v.stockQuantity + delta) } : v
+            v.id === variantId ? { ...v, stockQuantity: newStock } : v
           ),
         }))
       );

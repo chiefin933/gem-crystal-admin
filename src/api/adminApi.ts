@@ -134,11 +134,24 @@ export async function uploadProductImages(files: File[]): Promise<string[]> {
   return data.urls;
 }
 
-export async function adjustVariantStock(variantId: string, delta: number) {
-  return apiRequest<any>(`/products/variant/stock`, {
+export async function adjustVariantStock(variantId: string, delta: number, reason: string) {
+  return apiRequest<{ success: boolean; data: { id: string; stockQuantity: number } }>(`/products/variant/stock`, {
     method: 'PATCH',
-    body: JSON.stringify({ variantId, delta }),
+    body: JSON.stringify({ variantId, delta, reason }),
   });
+}
+
+// ──────── Audit Logs ───────────────────────────────────────────────────────
+
+export async function fetchAuditLogs() {
+  return apiRequest<Array<{
+    id: string;
+    actor: string;
+    action: string;
+    details: string;
+    ipAddress: string | null;
+    createdAt: string;
+  }>>('/pos/audit-logs');
 }
 
 // ──────── Orders ───────────────────────────────────────────────────────────

@@ -19,6 +19,8 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 
+const POS_URL = import.meta.env.VITE_POS_URL ?? 'http://localhost:5175';
+
 interface PosSaleRecord {
   id: string;
   receiptNumber: string;
@@ -44,20 +46,23 @@ export const PosMonitoring: React.FC = () => {
   const [sales, setSales] = useState<PosSaleRecord[]>([]);
   const [hardware, setHardware] = useState<any>(null);
   const [pendingRequests, setPendingRequests] = useState<PendingAuthRequest[]>([]);
+  const [activeSessions, setActiveSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [salesRes, hwRes, pendingRes] = await Promise.all([
+      const [salesRes, hwRes, pendingRes, sessionsRes] = await Promise.all([
         fetch('/api/pos/sales', { headers: getAuthHeader() }).then((r) => r.json()),
         fetch('/api/pos/hardware').then((r) => r.json()),
         fetch('/api/pos/pending-approvals', { headers: getAuthHeader() }).then((r) => r.json()),
+        fetch('/api/pos/sessions', { headers: getAuthHeader() }).then((r) => r.json()).then(d => d.sessions ?? []).catch(() => []),
       ]);
       setSales(Array.isArray(salesRes) ? salesRes : []);
       setHardware(hwRes);
       setPendingRequests(Array.isArray(pendingRes) ? pendingRes.filter((r: any) => r.status === 'PENDING') : []);
+      setActiveSessions(Array.isArray(sessionsRes) ? sessionsRes : []);
     } catch (err) {
       console.error('Failed to fetch POS monitoring data:', err);
     } finally {
@@ -131,13 +136,13 @@ export const PosMonitoring: React.FC = () => {
 
         <div className="flex items-center space-x-3">
           <a
-            href="http://localhost:5175"
+            href={POS_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-rose-400 hover:text-white font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-2"
           >
             <Tablet className="w-4 h-4" />
-            <span>Open Dedicated Tablet POS (5175)</span>
+            <span>Open POS Terminal</span>
             <ExternalLink className="w-3 h-3" />
           </a>
 
@@ -220,54 +225,54 @@ export const PosMonitoring: React.FC = () => {
         </div>
       )}
 
-      {/* POS Session Status Card */}
-      <div className="bg-gradient-to-r from-zinc-900 via-zinc-900 to-zinc-950 border border-zinc-800 rounded-2xl p-5 shadow-xl">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center space-x-4">
-            <div className="p-3 bg-emerald-950/80 border border-emerald-800/60 rounded-2xl text-emerald-400 shrink-0">
-              <Tablet className="w-7 h-7" />
-            </div>
-            <div>
-              <div className="flex items-center space-x-2.5">
-                <span className="flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-emerald-950 text-emerald-400 border border-emerald-800/80">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>TERMINAL ONLINE</span>
-                </span>
-                <span className="text-xs text-zinc-400 font-mono">ID: pos-01-roysambu</span>
+      {/* POS Session Status — driven by real active sessions from the backend */}
+      {activeSessions.length > 0 ? activeSessions.map((session: any) => (
+        <div key={session.id} className="bg-gradient-to-r from-zinc-900 via-zinc-900 to-zinc-950 border border-zinc-800 rounded-2xl p-5 shadow-xl">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-emerald-950/80 border border-emerald-800/60 rounded-2xl text-emerald-400 shrink-0">
+                <Tablet className="w-7 h-7" />
               </div>
-              <h2 className="text-base font-bold text-white mt-1">
-                Gem & Crystal POS Tablet 01 (Roysambu Hub)
-              </h2>
+              <div>
+                <div className="flex items-center space-x-2.5">
+                  <span className="flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-emerald-950 text-emerald-400 border border-emerald-800/80">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>SESSION ACTIVE</span>
+                  </span>
+                </div>
+                <h2 className="text-base font-bold text-white mt-1">{session.cashierName}</h2>
+              </div>
             </div>
-          </div>
-
-          <div className="flex flex-wrap gap-4 text-xs border-t md:border-t-0 border-zinc-800 pt-3 md:pt-0">
-            <div className="bg-zinc-950/80 border border-zinc-800/80 rounded-xl px-3.5 py-2">
-              <span className="text-[10px] text-zinc-500 uppercase font-bold block">Active Cashier</span>
-              <span className="text-white font-bold flex items-center gap-1 mt-0.5">
-                <UserCheck className="w-3.5 h-3.5 text-rose-400" />
-                <span>Cashier Grace</span>
-              </span>
-            </div>
-
-            <div className="bg-zinc-950/80 border border-zinc-800/80 rounded-xl px-3.5 py-2">
-              <span className="text-[10px] text-zinc-500 uppercase font-bold block">Session Started</span>
-              <span className="text-zinc-300 font-medium flex items-center gap-1 mt-0.5">
-                <Clock className="w-3.5 h-3.5 text-zinc-500" />
-                <span>Today, 08:30 AM</span>
-              </span>
-            </div>
-
-            <div className="bg-zinc-950/80 border border-zinc-800/80 rounded-xl px-3.5 py-2">
-              <span className="text-[10px] text-zinc-500 uppercase font-bold block">Auth Security</span>
-              <span className="text-emerald-400 font-semibold flex items-center gap-1 mt-0.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Owner Authorized</span>
-              </span>
+            <div className="flex flex-wrap gap-4 text-xs border-t md:border-t-0 border-zinc-800 pt-3 md:pt-0">
+              <div className="bg-zinc-950/80 border border-zinc-800/80 rounded-xl px-3.5 py-2">
+                <span className="text-[10px] text-zinc-500 uppercase font-bold block">Approved by</span>
+                <span className="text-white font-bold flex items-center gap-1 mt-0.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>{session.approvedBy}</span>
+                </span>
+              </div>
+              <div className="bg-zinc-950/80 border border-zinc-800/80 rounded-xl px-3.5 py-2">
+                <span className="text-[10px] text-zinc-500 uppercase font-bold block">Session started</span>
+                <span className="text-zinc-300 font-medium flex items-center gap-1 mt-0.5">
+                  <Clock className="w-3.5 h-3.5 text-zinc-500" />
+                  <span>{new Date(session.startTime).toLocaleString()}</span>
+                </span>
+              </div>
+              <div className="bg-zinc-950/80 border border-zinc-800/80 rounded-xl px-3.5 py-2">
+                <span className="text-[10px] text-zinc-500 uppercase font-bold block">Expires</span>
+                <span className="text-zinc-300 font-medium flex items-center gap-1 mt-0.5">
+                  <Clock className="w-3.5 h-3.5 text-zinc-500" />
+                  <span>{new Date(session.expiresAt).toLocaleString()}</span>
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )) : (
+        <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5 text-center text-xs text-zinc-500">
+          No active POS sessions. Terminal is locked.
+        </div>
+      )}
 
       {/* POS Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
