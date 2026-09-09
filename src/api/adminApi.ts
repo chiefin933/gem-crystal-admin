@@ -166,8 +166,12 @@ export async function fetchAuditLogs(page = 1, limit = 50, category = 'ALL') {
 
 // ──────── Orders ───────────────────────────────────────────────────────────
 
-export async function fetchOrders() {
-  return apiRequest<any[]>('/orders');
+export async function fetchOrders(page = 1, limit = 50) {
+  const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+  return apiRequest<{
+    data: any[];
+    pagination: { page: number; limit: number; total: number; totalPages: number };
+  }>(`/orders?${params}`);
 }
 
 export async function updateOrderStatus(orderId: string, payload: {

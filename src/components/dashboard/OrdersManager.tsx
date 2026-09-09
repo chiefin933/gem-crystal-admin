@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { fetchOrders, updateOrderStatus } from '../../api/adminApi';
-import { Package, Clock, CheckCircle2, Truck, RefreshCw, Smartphone, CreditCard, Search, User, MapPin } from 'lucide-react';
+import { Package, Clock, CheckCircle2, Truck, RefreshCw, Smartphone, CreditCard, Search, User, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export const OrdersManager: React.FC = () => {
   const [orders, setOrders] = useState<any[]>([]);
@@ -8,18 +8,22 @@ export const OrdersManager: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [search, setSearch] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({ total: 0, totalPages: 1 });
+  const LIMIT = 50;
 
   const loadOrders = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await fetchOrders();
-      setOrders(data);
+      const res = await fetchOrders(page, LIMIT);
+      setOrders(res.data);
+      setPagination(res.pagination);
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page]);
 
   useEffect(() => {
     loadOrders();
@@ -197,6 +201,23 @@ export const OrdersManager: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {pagination.totalPages > 1 && (
+        <div className="flex items-center justify-between text-xs text-zinc-400">
+          <span>Page {page} of {pagination.totalPages} — {pagination.total.toLocaleString()} total orders</span>
+          <div className="flex items-center gap-2">
+            <button disabled={page <= 1} onClick={() => setPage(p => p - 1)}
+              className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 disabled:opacity-30 hover:bg-zinc-800 transition">
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button disabled={page >= pagination.totalPages} onClick={() => setPage(p => p + 1)}
+              className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 disabled:opacity-30 hover:bg-zinc-800 transition">
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ORDER DETAILS MODAL */}
       {selectedOrder && (
