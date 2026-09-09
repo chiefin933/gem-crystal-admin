@@ -12,9 +12,10 @@ import {
   Store,
   Tablet,
   Settings,
+  ScrollText,
 } from 'lucide-react';
 
-export type AdminTab = 'overview' | 'pos' | 'products' | 'orders' | 'inventory' | 'coupons' | 'hardware';
+export type AdminTab = 'overview' | 'pos' | 'products' | 'orders' | 'inventory' | 'coupons' | 'audit' | 'hardware';
 
 interface SidebarProps {
   activeTab: AdminTab;
@@ -25,13 +26,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
   const { user, logout } = useAuth();
 
   const menuItems: { id: AdminTab; label: string; icon: any }[] = [
-    { id: 'overview', label: 'Overview & KPIs', icon: LayoutDashboard },
-    { id: 'pos', label: 'POS Monitoring & Sales', icon: Tablet },
-    { id: 'products', label: 'Product Catalog', icon: ShoppingBag },
-    { id: 'orders', label: 'Customer Orders', icon: Package },
-    { id: 'inventory', label: 'Inventory Control', icon: Boxes },
-    { id: 'coupons', label: 'Promos & Coupons', icon: Ticket },
-    { id: 'hardware', label: 'Hardware & Settings', icon: Settings },
+    { id: 'overview',   label: 'Overview & KPIs',         icon: LayoutDashboard },
+    { id: 'pos',        label: 'POS Monitoring & Sales',   icon: Tablet },
+    { id: 'products',   label: 'Product Catalog',          icon: ShoppingBag },
+    { id: 'orders',     label: 'Customer Orders',          icon: Package },
+    { id: 'inventory',  label: 'Inventory Control',        icon: Boxes },
+    { id: 'coupons',    label: 'Promos & Coupons',         icon: Ticket },
+    { id: 'audit',      label: 'Audit Trail',              icon: ScrollText },
+    { id: 'hardware',   label: 'Hardware & Settings',      icon: Settings },
   ];
 
   return (

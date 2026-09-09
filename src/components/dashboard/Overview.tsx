@@ -1,17 +1,32 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { fetchAdminStats } from '../../api/adminApi';
-import { ShoppingBag, Package, TrendingUp, AlertTriangle, CreditCard, Smartphone, Ticket } from 'lucide-react';
+import { ShoppingBag, Package, TrendingUp, AlertTriangle, Smartphone, Banknote, Ticket, Store, RefreshCw } from 'lucide-react';
 
 export const Overview: React.FC = () => {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
-  useEffect(() => {
-    fetchAdminStats()
-      .then(res => setStats(res))
-      .catch(err => console.error(err))
-      .finally(() => setLoading(false));
+  const load = useCallback(async () => {
+    try {
+      const res = await fetchAdminStats();
+      setStats(res);
+      setLastRefresh(new Date());
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  // Initial load
+  useEffect(() => { load(); }, [load]);
+
+  // Poll every 10 seconds so the owner sees live KPIs without manual refresh
+  useEffect(() => {
+    const id = setInterval(load, 10_000);
+    return () => clearInterval(id);
+  }, [load]);
 
   if (loading) {
     return (
@@ -31,18 +46,18 @@ export const Overview: React.FC = () => {
       sub: 'Visible in Live Storefront',
     },
     {
-      title: 'Total Orders Placed',
+      title: 'Total Online Orders',
       value: stats?.totalOrders ?? 0,
       icon: Package,
       color: 'from-amber-500 to-orange-600',
-      sub: `${stats?.pendingOrders ?? 0} Pending Fulfillment`,
+      sub: `${stats?.pendingOrders ?? 0} Pending Fulfilment`,
     },
     {
-      title: 'Total Sales Revenue',
-      value: `KES ${(stats?.totalRevenue ?? 0).toLocaleString()}`,
+      title: 'Total Business Revenue',
+      value: `KES ${Math.round(stats?.totalRevenue ?? 0).toLocaleString()}`,
       icon: TrendingUp,
       color: 'from-emerald-500 to-teal-600',
-      sub: `Avg Order KES ${Math.round(stats?.avgOrderValue ?? 0).toLocaleString()}`,
+      sub: `Online KES ${Math.round(stats?.ecomRevenue ?? 0).toLocaleString()} · POS KES ${Math.round(stats?.posRevenue ?? 0).toLocaleString()}`,
     },
     {
       title: 'Active Coupons',
@@ -59,11 +74,25 @@ export const Overview: React.FC = () => {
       <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
         <div>
           <h1 className="text-2xl font-extrabold text-white">Store Analytics & Operational Overview</h1>
-          <p className="text-xs text-zinc-400 mt-1">Real-time metrics connected directly to live SQLite database</p>
+          <p className="text-xs text-zinc-400 mt-1">
+            Live business metrics from the central database — ecommerce + in-store POS combined
+          </p>
         </div>
-        <div className="flex items-center gap-2 bg-emerald-950/60 border border-emerald-800/60 px-3 py-1.5 rounded-full text-xs font-semibold text-emerald-400">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          REST API Online (Port 4000)
+        <div className="flex items-center gap-3">
+          <span className="text-[10px] text-zinc-500">
+            Updated {lastRefresh.toLocaleTimeString()}
+          </span>
+          <button
+            onClick={load}
+            className="flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-300 text-xs font-semibold px-3 py-1.5 rounded-xl transition"
+          >
+            <RefreshCw className="w-3 h-3" />
+            Refresh
+          </button>
+          <div className="flex items-center gap-2 bg-emerald-950/60 border border-emerald-800/60 px-3 py-1.5 rounded-full text-xs font-semibold text-emerald-400">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            API Online
+          </div>
         </div>
       </div>
 
@@ -72,10 +101,7 @@ export const Overview: React.FC = () => {
         {kpis.map((kpi, idx) => {
           const Icon = kpi.icon;
           return (
-            <div
-              key={idx}
-              className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5 shadow-lg relative overflow-hidden group hover:border-zinc-700 transition"
-            >
+            <div key={idx} className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5 shadow-lg relative overflow-hidden group hover:border-zinc-700 transition">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">{kpi.title}</span>
                 <div className={`p-2.5 rounded-xl bg-gradient-to-tr ${kpi.color} text-white shadow-md`}>
@@ -91,42 +117,64 @@ export const Overview: React.FC = () => {
         })}
       </div>
 
-      {/* Payment Channels Breakdown */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Revenue Breakdown — full business picture */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* M-PESA — combined */}
         <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 shadow-lg">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <Smartphone className="w-5 h-5 text-emerald-400" />
-              <span>M-Pesa Collections</span>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-bold text-white flex items-center gap-2">
+              <Smartphone className="w-4 h-4 text-emerald-400" />
+              M-PESA Collections
             </h2>
-            <span className="text-xs font-semibold bg-emerald-950 text-emerald-300 border border-emerald-800/60 px-2.5 py-1 rounded-full">
-              Mobile Money Kenya
+            <span className="text-[10px] font-semibold bg-emerald-950 text-emerald-300 border border-emerald-800/60 px-2 py-0.5 rounded-full">
+              All Channels
             </span>
           </div>
-          <div className="text-3xl font-black text-emerald-400">
-            KES {(stats?.mpesaRevenue ?? 0).toLocaleString()}
+          <div className="text-2xl font-black text-emerald-400">
+            KES {Math.round(stats?.mpesaRevenue ?? 0).toLocaleString()}
           </div>
-          <p className="text-xs text-zinc-400 mt-2">
-            Direct STK Push & Till payments recorded from storefront orders.
-          </p>
+          <div className="mt-2 space-y-0.5 text-[11px] text-zinc-500">
+            <div className="flex justify-between">
+              <span>Online STK Push</span>
+              <span className="text-zinc-300">KES {Math.round(stats?.ecomMpesaRevenue ?? 0).toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>POS M-PESA</span>
+              <span className="text-zinc-300">KES {Math.round(stats?.posMpesaRevenue ?? 0).toLocaleString()}</span>
+            </div>
+          </div>
         </div>
 
+        {/* Cash — POS only */}
         <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 shadow-lg">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <CreditCard className="w-5 h-5 text-rose-400" />
-              <span>Card Collections</span>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-bold text-white flex items-center gap-2">
+              <Banknote className="w-4 h-4 text-amber-400" />
+              Cash Collections
             </h2>
-            <span className="text-xs font-semibold bg-rose-950 text-rose-300 border border-rose-800/60 px-2.5 py-1 rounded-full">
-              Visa & Mastercard
+            <span className="text-[10px] font-semibold bg-amber-950 text-amber-300 border border-amber-800/60 px-2 py-0.5 rounded-full">
+              POS Only
             </span>
           </div>
-          <div className="text-3xl font-black text-rose-400">
-            KES {(stats?.cardRevenue ?? 0).toLocaleString()}
+          <div className="text-2xl font-black text-amber-400">
+            KES {Math.round(stats?.cashRevenue ?? 0).toLocaleString()}
           </div>
-          <p className="text-xs text-zinc-400 mt-2">
-            International & local debit/credit card checkouts.
-          </p>
+          <p className="text-[11px] text-zinc-500 mt-2">Physical cash drawer transactions at Roysambu hub.</p>
+        </div>
+
+        {/* Card — coming soon */}
+        <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 shadow-lg opacity-60">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-bold text-white flex items-center gap-2">
+              <Store className="w-4 h-4 text-zinc-500" />
+              Card Payments
+            </h2>
+            <span className="text-[10px] font-semibold bg-zinc-950 text-zinc-500 border border-zinc-800 px-2 py-0.5 rounded-full">
+              Coming Soon
+            </span>
+          </div>
+          <div className="text-2xl font-black text-zinc-500">KES 0</div>
+          <p className="text-[11px] text-zinc-600 mt-2">Card gateway not yet integrated. No card payments are currently accepted.</p>
         </div>
       </div>
 
@@ -165,7 +213,9 @@ export const Overview: React.FC = () => {
                     <td className="p-3 text-zinc-300">{item.size} / {item.color}</td>
                     <td className="p-3 text-right">
                       <span className={`inline-block px-2 py-0.5 rounded font-bold ${
-                        item.stockQuantity === 0 ? 'bg-rose-950 text-rose-400 border border-rose-800/60' : 'bg-amber-950 text-amber-400 border border-amber-800/60'
+                        item.stockQuantity === 0
+                          ? 'bg-rose-950 text-rose-400 border border-rose-800/60'
+                          : 'bg-amber-950 text-amber-400 border border-amber-800/60'
                       }`}>
                         {item.stockQuantity} units
                       </span>

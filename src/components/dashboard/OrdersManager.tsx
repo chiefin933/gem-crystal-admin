@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { fetchOrders, updateOrderStatus } from '../../api/adminApi';
 import { Package, Clock, CheckCircle2, Truck, RefreshCw, Smartphone, CreditCard, Search, User, MapPin } from 'lucide-react';
 
@@ -9,7 +9,7 @@ export const OrdersManager: React.FC = () => {
   const [search, setSearch] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
 
-  const loadOrders = async () => {
+  const loadOrders = useCallback(async () => {
     setLoading(true);
     try {
       const data = await fetchOrders();
@@ -19,19 +19,20 @@ export const OrdersManager: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadOrders();
-  }, []);
+    // Poll every 5 seconds so new orders appear without manual refresh
+    const id = setInterval(loadOrders, 5_000);
+    return () => clearInterval(id);
+  }, [loadOrders]);
 
-  const handleUpdateStatus = async (orderId: string, fulfillmentStatus: string, paymentStatus?: string) => {
+  const handleUpdateStatus = async (orderId: string, fulfillmentStatus: string) => {
     try {
-      const updated = await updateOrderStatus(orderId, { fulfillmentStatus, paymentStatus });
+      const updated = await updateOrderStatus(orderId, { fulfillmentStatus });
       setOrders(prev => prev.map(o => (o.id === orderId ? updated : o)));
-      if (selectedOrder?.id === orderId) {
-        setSelectedOrder(updated);
-      }
+      if (selectedOrder?.id === orderId) setSelectedOrder(updated);
     } catch (err: any) {
       alert(err.message || 'Failed to update order status');
     }
@@ -53,7 +54,7 @@ export const OrdersManager: React.FC = () => {
         <div>
           <h1 className="text-2xl font-extrabold text-white">Customer Orders & Dispatch</h1>
           <p className="text-xs text-zinc-400 mt-1">
-            Real-time orders placed via M-Pesa STK push and Card Checkout
+            Live orders placed via M-PESA STK Push. Payment status is updated automatically by the payment system.
           </p>
         </div>
 
@@ -159,7 +160,7 @@ export const OrdersManager: React.FC = () => {
                       <div className="flex items-center justify-end gap-1">
                         {o.fulfillmentStatus === 'PENDING' && (
                           <button
-                            onClick={() => handleUpdateStatus(o.id, 'PROCESSING', 'PAID')}
+                            onClick={() => handleUpdateStatus(o.id, 'PROCESSING')}
                             className="bg-amber-900/60 hover:bg-amber-800 text-amber-200 border border-amber-700/60 font-semibold px-2.5 py-1 rounded text-[11px] transition"
                           >
                             Process Order

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getAuthHeader } from '../../api/adminApi';
 import {
   Tablet,
@@ -50,11 +50,11 @@ export const PosMonitoring: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const [salesRes, hwRes, pendingRes, sessionsRes] = await Promise.all([
-        fetch('/api/pos/sales', { headers: getAuthHeader() }).then((r) => r.json()),
+        fetch('/api/pos/sales', { headers: getAuthHeader() }).then((r) => r.json()).then(d => d.data ?? d),
         fetch('/api/pos/hardware', { headers: getAuthHeader() }).then((r) => r.json()),
         fetch('/api/pos/pending-approvals', { headers: getAuthHeader() }).then((r) => r.json()),
         fetch('/api/pos/sessions', { headers: getAuthHeader() }).then((r) => r.json()).then(d => d.sessions ?? []).catch(() => []),
@@ -68,22 +68,15 @@ export const PosMonitoring: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadData();
-    // Poll pending login requests every 3 seconds
-    const interval = setInterval(async () => {
-      try {
-        const pendingRes = await fetch('/api/pos/pending-approvals', { headers: getAuthHeader() }).then((r) => r.json());
-        setPendingRequests(Array.isArray(pendingRes) ? pendingRes.filter((r: any) => r.status === 'PENDING') : []);
-      } catch (err) {
-        // ignore polling error
-      }
-    }, 3000);
-
+    // Poll every 3 seconds — pending approvals, active sessions, and new sales
+    // all update automatically so the owner never has to manually refresh
+    const interval = setInterval(loadData, 3_000);
     return () => clearInterval(interval);
-  }, []);
+  }, [loadData]);
 
   const handleApproveAction = async (requestId: string, action: 'APPROVE' | 'REJECT', cashierName: string) => {
     try {

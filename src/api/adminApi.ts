@@ -48,11 +48,17 @@ export async function fetchAdminStats() {
     totalProducts: number;
     totalOrders: number;
     totalRevenue: number;
+    ecomRevenue: number;
+    posRevenue: number;
     pendingOrders: number;
     avgOrderValue: number;
     activeCoupons: number;
     mpesaRevenue: number;
+    cashRevenue: number;
     cardRevenue: number;
+    ecomMpesaRevenue: number;
+    posMpesaRevenue: number;
+    posCashRevenue: number;
     lowStockVariants: {
       variantId: string;
       sku: string;
@@ -143,15 +149,19 @@ export async function adjustVariantStock(variantId: string, delta: number, reaso
 
 // ──────── Audit Logs ───────────────────────────────────────────────────────
 
-export async function fetchAuditLogs() {
-  return apiRequest<Array<{
-    id: string;
-    actor: string;
-    action: string;
-    details: string;
-    ipAddress: string | null;
-    createdAt: string;
-  }>>('/pos/audit-logs');
+export async function fetchAuditLogs(page = 1, limit = 50, category = 'ALL') {
+  const params = new URLSearchParams({ page: String(page), limit: String(limit), category });
+  return apiRequest<{
+    data: Array<{
+      id: string;
+      actor: string;
+      action: string;
+      details: string;
+      ipAddress: string | null;
+      createdAt: string;
+    }>;
+    pagination: { page: number; limit: number; total: number; totalPages: number };
+  }>(`/pos/audit-logs?${params}`);
 }
 
 // ──────── Orders ───────────────────────────────────────────────────────────
@@ -162,7 +172,6 @@ export async function fetchOrders() {
 
 export async function updateOrderStatus(orderId: string, payload: {
   fulfillmentStatus?: string;
-  paymentStatus?: string;
   mpesaReceipt?: string;
 }) {
   return apiRequest<any>(`/orders/${orderId}`, {
