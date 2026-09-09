@@ -55,7 +55,7 @@ export const PosMonitoring: React.FC = () => {
     try {
       const [salesRes, hwRes, pendingRes, sessionsRes] = await Promise.all([
         fetch('/api/pos/sales', { headers: getAuthHeader() }).then((r) => r.json()),
-        fetch('/api/pos/hardware').then((r) => r.json()),
+        fetch('/api/pos/hardware', { headers: getAuthHeader() }).then((r) => r.json()),
         fetch('/api/pos/pending-approvals', { headers: getAuthHeader() }).then((r) => r.json()),
         fetch('/api/pos/sessions', { headers: getAuthHeader() }).then((r) => r.json()).then(d => d.sessions ?? []).catch(() => []),
       ]);

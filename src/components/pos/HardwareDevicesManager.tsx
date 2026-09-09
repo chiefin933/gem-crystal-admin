@@ -16,7 +16,7 @@ export const HardwareDevicesManager: React.FC = () => {
     setLoading(true);
     try {
       const [hwRes, setRes] = await Promise.all([
-        fetch('/api/pos/hardware').then(r => r.json()),
+        fetch('/api/pos/hardware', { headers: getAuthHeader() }).then(r => r.json()),
         fetch('/api/settings').then(r => r.json()),
       ]);
       setHardware(hwRes);
