@@ -215,3 +215,36 @@ export async function deleteCoupon(code: string) {
     method: 'DELETE',
   });
 }
+
+// ──────── Unmatched Payments ───────────────────────────────────────────────
+
+export async function fetchUnmatchedPayments() {
+  return apiRequest<{
+    data: Array<{
+      id: string;
+      mpesaReceipt: string;
+      amount: number;
+      phone: string;
+      payerName: string | null;
+      receivedAt: string;
+      status: string;
+      resolutionNote: string | null;
+      resolvedAt: string | null;
+      resolvedBy: string | null;
+    }>;
+    pagination: { page: number; limit: number; total: number; totalPages: number };
+  }>('/orders/unmatched-payments');
+}
+
+export async function resolveUnmatchedPayment(
+  id: string,
+  action: 'ASSIGNED' | 'IGNORED',
+  note: string,
+  targetType?: 'ORDER' | 'POS_SALE',
+  targetRef?: string,
+) {
+  return apiRequest<{ success: boolean }>(`/orders/unmatched-payments/${id}/resolve`, {
+    method: 'POST',
+    body: JSON.stringify({ action, note, targetType, targetRef }),
+  });
+}

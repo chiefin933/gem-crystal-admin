@@ -13,9 +13,10 @@ import {
   Tablet,
   Settings,
   ScrollText,
+  AlertTriangle,
 } from 'lucide-react';
 
-export type AdminTab = 'overview' | 'pos' | 'products' | 'orders' | 'inventory' | 'coupons' | 'audit' | 'hardware';
+export type AdminTab = 'overview' | 'pos' | 'products' | 'orders' | 'inventory' | 'coupons' | 'unmatched' | 'audit' | 'hardware';
 
 interface SidebarProps {
   activeTab: AdminTab;
@@ -32,6 +33,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
     { id: 'orders',     label: 'Customer Orders',          icon: Package },
     { id: 'inventory',  label: 'Inventory Control',        icon: Boxes },
     { id: 'coupons',    label: 'Promos & Coupons',         icon: Ticket },
+    { id: 'unmatched',  label: 'Unmatched Payments',       icon: AlertTriangle },
     { id: 'audit',      label: 'Audit Trail',              icon: ScrollText },
     { id: 'hardware',   label: 'Hardware & Settings',      icon: Settings },
   ];
