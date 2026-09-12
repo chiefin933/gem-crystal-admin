@@ -135,7 +135,7 @@ export const Overview: React.FC = () => {
           </div>
           <div className="mt-2 space-y-0.5 text-[11px] text-zinc-500">
             <div className="flex justify-between">
-              <span>Online STK Push</span>
+              <span>Online Till / M-PESA</span>
               <span className="text-zinc-300">KES {Math.round(stats?.ecomMpesaRevenue ?? 0).toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
@@ -175,6 +175,76 @@ export const Overview: React.FC = () => {
           </div>
           <div className="text-2xl font-black text-zinc-500">KES 0</div>
           <p className="text-[11px] text-zinc-600 mt-2">Card gateway not yet integrated. No card payments are currently accepted.</p>
+        </div>
+      </div>
+
+      {/* Sales by Day — last 14 days */}
+      <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 shadow-lg">
+        <h2 className="text-base font-bold text-white mb-4">Sales Revenue — Last 14 Days</h2>
+        {!stats?.salesByDay?.length ? (
+          <p className="text-xs text-zinc-500 py-4 text-center">No sales data yet.</p>
+        ) : (
+          <div className="flex items-end gap-1 h-32">
+            {stats.salesByDay.map((d: any) => {
+              const maxRev = Math.max(...stats.salesByDay.map((x: any) => x.revenue), 1);
+              const pct = Math.round((d.revenue / maxRev) * 100);
+              return (
+                <div key={d.date} className="flex-1 flex flex-col items-center gap-1 group">
+                  <div className="relative w-full">
+                    <div
+                      className="w-full bg-rose-600/80 hover:bg-rose-500 rounded-t transition-all"
+                      style={{ height: `${Math.max(pct, 2)}%`, minHeight: d.revenue > 0 ? '4px' : '2px' }}
+                      title={`${d.date}: KES ${d.revenue.toLocaleString()}`}
+                    />
+                  </div>
+                  <span className="text-[8px] text-zinc-600 rotate-45 origin-left hidden sm:block">
+                    {d.date.slice(5)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Top & Slow Moving Products */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 shadow-lg">
+          <h2 className="text-sm font-bold text-white mb-3">🔥 Fast Moving (30 days)</h2>
+          {!stats?.topProducts?.length ? (
+            <p className="text-xs text-zinc-500">No sales data yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {stats.topProducts.map((p: any, i: number) => (
+                <div key={i} className="flex items-center justify-between text-xs">
+                  <span className="text-zinc-200 truncate max-w-[60%]">{p.title}</span>
+                  <div className="flex items-center gap-3 text-zinc-400">
+                    <span>{p.units} units</span>
+                    <span className="text-emerald-400 font-bold">KES {p.revenue.toLocaleString()}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 shadow-lg">
+          <h2 className="text-sm font-bold text-white mb-3">🐢 Slow Moving (30 days)</h2>
+          {!stats?.slowProducts?.length ? (
+            <p className="text-xs text-zinc-500">No sales data yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {stats.slowProducts.map((p: any, i: number) => (
+                <div key={i} className="flex items-center justify-between text-xs">
+                  <span className="text-zinc-200 truncate max-w-[60%]">{p.title}</span>
+                  <div className="flex items-center gap-3 text-zinc-400">
+                    <span>{p.units} units</span>
+                    <span className="text-amber-400 font-bold">KES {p.revenue.toLocaleString()}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

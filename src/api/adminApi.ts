@@ -45,29 +45,18 @@ export async function fetchAdminMe() {
 
 export async function fetchAdminStats() {
   return apiRequest<{
-    totalProducts: number;
-    totalOrders: number;
-    totalRevenue: number;
-    ecomRevenue: number;
-    posRevenue: number;
-    pendingOrders: number;
-    avgOrderValue: number;
-    activeCoupons: number;
-    mpesaRevenue: number;
-    cashRevenue: number;
-    cardRevenue: number;
-    ecomMpesaRevenue: number;
-    posMpesaRevenue: number;
-    posCashRevenue: number;
-    lowStockVariants: {
-      variantId: string;
-      sku: string;
-      size: string;
-      color: string;
-      stockQuantity: number;
-      productTitle: string;
-      productCategory: string;
-    }[];
+    totalProducts: number; totalOrders: number; totalRevenue: number;
+    ecomRevenue: number; posRevenue: number; pendingOrders: number;
+    avgOrderValue: number; activeCoupons: number;
+    mpesaRevenue: number; cashRevenue: number; cardRevenue: number;
+    ecomMpesaRevenue: number; posMpesaRevenue: number; posCashRevenue: number;
+    salesByDay: Array<{ date: string; revenue: number }>;
+    topProducts: Array<{ title: string; units: number; revenue: number }>;
+    slowProducts: Array<{ title: string; units: number; revenue: number }>;
+    lowStockVariants: Array<{
+      variantId: string; sku: string; size: string; color: string;
+      stockQuantity: number; productTitle: string; productCategory: string;
+    }>;
   }>('/admin/stats');
 }
 
