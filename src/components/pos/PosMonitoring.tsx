@@ -105,16 +105,16 @@ export const PosMonitoring: React.FC = () => {
   };
 
   // Compute POS statistics
-  const totalPosRevenue = sales.reduce((sum, s) => sum + s.total, 0);
+  const totalPosRevenue = sales.reduce((sum, s) => sum + (Number(s.total) || 0), 0);
   const mpesaRevenue = sales
     .filter((s) => s.paymentMethod === 'MPESA')
-    .reduce((sum, s) => sum + s.total, 0);
+    .reduce((sum, s) => sum + (Number(s.total) || 0), 0);
   const cashRevenue = sales
     .filter((s) => s.paymentMethod === 'CASH')
-    .reduce((sum, s) => sum + s.total, 0);
+    .reduce((sum, s) => sum + (Number(s.total) || 0), 0);
   const cardRevenue = sales
     .filter((s) => s.paymentMethod === 'CARD')
-    .reduce((sum, s) => sum + s.total, 0);
+    .reduce((sum, s) => sum + (Number(s.total) || 0), 0);
 
   return (
     <div className="space-y-6">
@@ -288,7 +288,7 @@ export const PosMonitoring: React.FC = () => {
             </div>
           </div>
           <p className="text-2xl font-extrabold text-emerald-400">KES {mpesaRevenue.toLocaleString()}</p>
-          <p className="text-[11px] text-zinc-400 mt-1">Instant STK confirmation</p>
+          <p className="text-[11px] text-zinc-400 mt-1">Till payment confirmations</p>
         </div>
 
         <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5 shadow-lg">
@@ -366,7 +366,7 @@ export const PosMonitoring: React.FC = () => {
                         {sale.paymentMethod}
                       </span>
                     </td>
-                    <td className="p-4 font-bold text-white">KES {sale.total.toLocaleString()}</td>
+                    <td className="p-4 font-bold text-white">KES {(Number(sale.total) || 0).toLocaleString('en-KE')}</td>
                     <td className="p-4 text-zinc-400 font-mono text-[11px]">
                       {new Date(sale.createdAt).toLocaleString()}
                     </td>
