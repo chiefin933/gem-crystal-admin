@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getAuthHeader } from '../../api/adminApi';
+import { API_BASE, getAuthHeader } from '../../api/adminApi';
 import {
   Tablet,
   CheckCircle2,
@@ -54,10 +54,10 @@ export const PosMonitoring: React.FC = () => {
     setLoading(true);
     try {
       const [salesRes, hwRes, pendingRes, sessionsRes] = await Promise.all([
-        fetch('/api/pos/sales', { headers: getAuthHeader() }).then((r) => r.json()).then(d => d.data ?? d),
-        fetch('/api/pos/hardware', { headers: getAuthHeader() }).then((r) => r.json()),
-        fetch('/api/pos/pending-approvals', { headers: getAuthHeader() }).then((r) => r.json()),
-        fetch('/api/pos/sessions', { headers: getAuthHeader() }).then((r) => r.json()).then(d => d.sessions ?? []).catch(() => []),
+        fetch(`${API_BASE}/pos/sales`, { headers: getAuthHeader() }).then((r) => r.json()).then(d => d.data ?? d),
+        fetch(`${API_BASE}/pos/hardware`, { headers: getAuthHeader() }).then((r) => r.json()),
+        fetch(`${API_BASE}/pos/pending-approvals`, { headers: getAuthHeader() }).then((r) => r.json()),
+        fetch(`${API_BASE}/pos/sessions`, { headers: getAuthHeader() }).then((r) => r.json()).then(d => d.sessions ?? []).catch(() => []),
       ]);
       setSales(Array.isArray(salesRes) ? salesRes : []);
       setHardware(hwRes);
@@ -80,7 +80,7 @@ export const PosMonitoring: React.FC = () => {
 
   const handleApproveAction = async (requestId: string, action: 'APPROVE' | 'REJECT', cashierName: string) => {
     try {
-      const res = await fetch('/api/pos/approve-request', {
+      const res = await fetch(`${API_BASE}/pos/approve-request`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
