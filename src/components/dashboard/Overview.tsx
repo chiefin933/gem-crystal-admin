@@ -1,19 +1,22 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { fetchAdminStats } from '../../api/adminApi';
-import { ShoppingBag, Package, TrendingUp, AlertTriangle, Smartphone, Banknote, Ticket, Store, RefreshCw } from 'lucide-react';
+import { ShoppingBag, Package, TrendingUp, AlertTriangle, Smartphone, Banknote, Ticket, Store, RefreshCw, CalendarDays, Clock3, History } from 'lucide-react';
 
 export const Overview: React.FC = () => {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
       const res = await fetchAdminStats();
       setStats(res);
       setLastRefresh(new Date());
+      setError(null);
     } catch (err) {
       console.error(err);
+      setError('Live figures could not be refreshed. Retry when the API is available.');
     } finally {
       setLoading(false);
     }
@@ -68,6 +71,8 @@ export const Overview: React.FC = () => {
     },
   ];
 
+  const salesPeriods = stats?.salesPeriods?.periods ?? [];
+  const formatKes = (amount: number) => `KES ${Math.round(amount).toLocaleString('en-KE')}`;
   return (
     <div className="space-y-8">
       {/* Top Banner */}
@@ -95,6 +100,65 @@ export const Overview: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {error && (
+        <div role="alert" className="flex items-center justify-between gap-3 border border-rose-900/80 bg-rose-950/40 px-4 py-3 text-xs text-rose-200">
+          <span>{error}</span>
+          <button onClick={load} className="shrink-0 font-bold text-rose-100 underline underline-offset-4">Retry</button>
+        </div>
+      )}
+
+      <section aria-labelledby="sales-periods-title" className="border border-zinc-800 bg-zinc-900/55 p-5 shadow-lg">
+        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="rounded-xl border border-rose-900/70 bg-rose-950/50 p-2 text-rose-300">
+              <CalendarDays className="h-5 w-5" aria-hidden="true" />
+            </div>
+            <div>
+              <h2 id="sales-periods-title" className="text-base font-bold text-white">Sales periods</h2>
+              <p className="mt-1 text-xs text-zinc-400">
+                Completed website and cashier-confirmed POS sales only.
+              </p>
+            </div>
+          </div>
+          <span className="w-fit border border-zinc-700 bg-zinc-950 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-400">
+            Business time · {stats?.salesPeriods?.timeZone ?? 'Africa/Nairobi'}
+          </span>
+        </div>
+
+        {salesPeriods.length === 0 ? (
+          <div className="flex items-center gap-3 border border-dashed border-zinc-700 bg-zinc-950/40 p-5 text-xs text-zinc-400">
+            <CalendarDays className="h-5 w-5 shrink-0 text-zinc-500" aria-hidden="true" />
+            <div>
+              <p className="font-semibold text-zinc-200">Sales-period data is not available yet.</p>
+              <p className="mt-1">Refresh after the API is available; an unavailable report is never shown as KES 0.</p>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {salesPeriods.map((period: any) => {
+              const Icon = period.key === 'today' ? Clock3 : period.key === 'yesterday' ? History : CalendarDays;
+              const isToday = period.key === 'today';
+              return (
+                <article key={period.key} className={`border p-4 transition-colors ${isToday ? 'border-rose-800/80 bg-rose-950/20' : 'border-zinc-800 bg-zinc-950/35 hover:border-zinc-700'}`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-zinc-300">{period.label}</p>
+                    <div className={`rounded-lg p-2 ${isToday ? 'bg-rose-900/50 text-rose-300' : 'bg-zinc-800 text-zinc-400'}`}>
+                      <Icon className="h-4 w-4" aria-hidden="true" />
+                    </div>
+                  </div>
+                  <p className="mt-5 text-2xl font-black tabular-nums text-white">{formatKes(period.revenue)}</p>
+                  <p className="mt-1 text-xs text-zinc-400">{period.description}</p>
+                  <div className="mt-4 flex items-center justify-between gap-2 border-t border-zinc-800 pt-3 text-[11px] text-zinc-400">
+                    <span>{period.transactions} completed {period.transactions === 1 ? 'transaction' : 'transactions'}</span>
+                    {isToday && Number(period.revenue) === 0 && <span className="font-semibold text-zinc-300">New day reset</span>}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </section>
 
       {/* KPI Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">

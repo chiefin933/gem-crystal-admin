@@ -51,6 +51,17 @@ export async function fetchAdminStats() {
     mpesaRevenue: number; cashRevenue: number; cardRevenue: number;
     ecomMpesaRevenue: number; posMpesaRevenue: number; posCashRevenue: number;
     salesByDay: Array<{ date: string; revenue: number }>;
+    salesPeriods: {
+      timeZone: string;
+      generatedAt: string;
+      periods: Array<{
+        key: 'today' | 'yesterday' | 'last7Days' | 'last30Days';
+        label: string;
+        description: string;
+        revenue: number;
+        transactions: number;
+      }>;
+    };
     topProducts: Array<{ title: string; units: number; revenue: number }>;
     slowProducts: Array<{ title: string; units: number; revenue: number }>;
     lowStockVariants: Array<{
