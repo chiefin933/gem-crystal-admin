@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gem & Crystal — Boutique Pulse</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --stone: #f3eee7;
+      --paper: #fffdf9;
+      --ink: #20122b;
+      --muted: #6b6270;
+      --plum: #35133e;
+      --coral: #ef5d55;
+      --saffron: #f7b631;
+      --cobalt: #245bd9;
+      --mint: #cfe5d5;
+      --line: #d8d0c8;
+      --radius: 6px;
+    }
+    * { box-sizing: border-box; }
+    html { background: var(--stone); }
+    body { margin: 0; background: var(--stone); color: var(--ink); font-family: "DM Sans", sans-serif; }
+    button { font: inherit; }
+    .app-shell { min-height: 100vh; display: grid; grid-template-columns: 238px minmax(0, 1fr); }
+    .sidebar { background: var(--plum); color: #fff8f2; padding: 28px 20px 24px; display: flex; flex-direction: column; }
+    .logo { display: flex; gap: 11px; align-items: center; padding: 0 7px 31px; border-bottom: 1px solid rgba(255,255,255,.22); }
+    .mark { width: 31px; height: 31px; position: relative; border: 2px solid var(--saffron); transform: rotate(45deg); }
+    .mark::after { content: ""; position: absolute; inset: 6px; background: var(--coral); }
+    .logo b { display: block; letter-spacing: .02em; font-size: 15px; }
+    .logo span { color: #d5bfd8; font-size: 10px; letter-spacing: .13em; text-transform: uppercase; }
+    nav { padding-top: 24px; display: grid; gap: 5px; }
+    .nav-label { color: #cdb7d0; font-size: 10px; text-transform: uppercase; letter-spacing: .14em; padding: 0 10px 10px; }
+    .nav-item { color: #eaddeb; text-decoration: none; padding: 11px 10px; display: flex; gap: 11px; align-items: center; font-size: 14px; transition: background .2s, color .2s, transform .2s; }
+    .nav-item:hover { background: rgba(255,255,255,.11); transform: translateX(3px); }
+    .nav-item.active { background: var(--coral); color: #fff; font-weight: 700; }
+    .nav-icon { width: 17px; text-align: center; font-family: "DM Mono"; font-size: 12px; }
+    .owner-card { margin-top: auto; border-top: 1px solid rgba(255,255,255,.22); padding: 21px 7px 0; display: flex; align-items: center; gap: 10px; }
+    .avatar { background: var(--saffron); color: var(--plum); border-radius: 50%; width: 34px; height: 34px; display: grid; place-items: center; font-weight: 700; font-size: 12px; }
+    .owner-card b { display: block; font-size: 13px; }
+    .owner-card small { color: #cdb7d0; display:block; margin-top:2px; font-size: 11px; }
+    main { padding: 0 44px 44px; max-width: 1580px; width: 100%; margin: 0 auto; }
+    .topbar { min-height: 87px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); }
+    .location { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+    .pin { color: var(--coral); font-size: 18px; font-family: "DM Mono"; }
+    .topbar-actions { display: flex; align-items: center; gap: 14px; }
+    .date { font-size: 12px; color: var(--muted); font-family: "DM Mono"; }
+    .live { border: 1px solid var(--ink); padding: 8px 11px; font-family: "DM Mono"; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; background: transparent; color: var(--ink); cursor: pointer; }
+    .live:hover { background: var(--ink); color: var(--paper); }
+    .live:focus-visible, a:focus-visible { outline: 3px solid var(--cobalt); outline-offset: 3px; }
+    .intro { padding: 43px 0 30px; display: flex; justify-content: space-between; align-items: end; gap: 25px; }
+    h1 { font-family: "Playfair Display", serif; font-size: clamp(42px, 5vw, 67px); line-height: .91; letter-spacing: -.055em; font-weight: 700; margin: 0; }
+    h1 em { color: var(--coral); font-style: italic; }
+    .intro p { max-width: 420px; color: var(--muted); margin: 0 0 4px; line-height: 1.55; font-size: 15px; }
+    .period-grid { display: grid; grid-template-columns: 1.55fr repeat(3, 1fr); gap: 14px; }
+    .period { min-height: 185px; padding: 21px 21px 18px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid var(--ink); }
+    .period .eyebrow, .section-kicker { font-family: "DM Mono"; text-transform: uppercase; letter-spacing: .09em; font-size: 10px; }
+    .period .amount { font-family: "Playfair Display", serif; font-size: clamp(29px, 3vw, 46px); line-height: 1; letter-spacing: -.055em; font-weight: 700; white-space: nowrap; }
+    .period small { font-size: 12px; line-height: 1.35; max-width: 180px; }
+    .today { color: var(--paper); background: var(--coral); border-color: var(--coral); }
+    .today::after { content: ""; position:absolute; width: 130px; height:130px; right:-48px; bottom:-70px; border: 21px solid var(--saffron); border-radius:50%; }
+    .yesterday { background: var(--saffron); }
+    .week { background: var(--cobalt); color: #fff; border-color: var(--cobalt); }
+    .month { background: var(--paper); }
+    .month::after { content:""; position:absolute; top:15px; right:17px; width:34px; height:34px; border: 7px solid var(--mint); transform: rotate(45deg); }
+    .story-grid { margin-top: 14px; display:grid; grid-template-columns: minmax(380px, 1.55fr) minmax(230px, .85fr) minmax(240px, .9fr); gap:14px; }
+    .panel { background: var(--paper); border: 1px solid var(--line); min-height: 264px; padding: 22px; }
+    .panel-head { display: flex; justify-content: space-between; gap:15px; align-items: start; }
+    .panel h2 { font-family:"Playfair Display", serif; margin: 5px 0 0; font-size: 24px; letter-spacing:-.035em; }
+    .subtle { color: var(--muted); font-size:12px; }
+    .trend { position:relative; overflow:hidden; }
+    .trend-lines { margin-top: 26px; height: 142px; display: grid; grid-template-columns: repeat(7,1fr); align-items: end; gap: 9px; border-bottom: 1px solid var(--ink); position:relative; }
+    .trend-lines::before, .trend-lines::after { content:""; height:1px; background:var(--line); position:absolute; left:0; right:0; }
+    .trend-lines::before { bottom: 48px; } .trend-lines::after { bottom: 96px; }
+    .bar { background: var(--plum); position:relative; z-index:1; min-height: 17px; transition: transform .2s; }
+    .bar:hover { transform: translateY(-6px); background: var(--coral); }
+    .bar.today-bar { background:var(--coral); }
+    .days { display:grid; grid-template-columns:repeat(7,1fr); gap:9px; margin-top:8px; font-family:"DM Mono"; color:var(--muted); font-size:10px; text-align:center; }
+    .fulfillment { background: var(--plum); color: var(--paper); border-color:var(--plum); display:flex; flex-direction:column; }
+    .fulfillment .subtle { color:#d8c5db; }
+    .donut { width: 111px; height:111px; border-radius:50%; margin:21px auto 10px; background:conic-gradient(var(--saffron) 0 72%, var(--coral) 72% 87%, #674a70 87% 100%); display:grid; place-items:center; }
+    .donut > div { width:77px; height:77px; border-radius:50%; display:grid; place-items:center; background:var(--plum); text-align:center; }
+    .donut b { display:block; font-family:"Playfair Display"; font-size:24px; } .donut span { font-size:9px; color:#d8c5db; }
+    .key { display:flex; justify-content:space-between; border-top:1px solid rgba(255,255,255,.2); padding-top: 11px; margin-top:auto; font-size:11px; }
+    .key i { display:inline-block; width:8px; height:8px; margin-right:5px; background:var(--saffron); } .key .coral-key {background:var(--coral);}
+    .spotlight { background:var(--mint); border-color:var(--mint); position:relative; overflow:hidden; }
+    .spotlight-shape { position:absolute; right:-39px; bottom:-61px; width:156px; height:156px; border:22px solid var(--cobalt); transform:rotate(25deg); }
+    .stock-number { margin:35px 0 5px; font-family:"Playfair Display"; font-size:52px; line-height:.8; letter-spacing:-.06em; }
+    .spotlight strong { font-size:14px; display:block; margin-top:9px; max-width:160px; line-height:1.25; }
+    .stock-tag { font: 10px "DM Mono"; display:inline-block; border:1px solid var(--ink); padding:5px 7px; margin-top:14px; }
+    .actions-title { margin: 38px 0 14px; display:flex; align-items:baseline; justify-content:space-between; }
+    .actions-title h2 { font-family:"Playfair Display"; font-size:30px; margin:0; letter-spacing:-.035em; }
+    .actions-title p { margin:0; font-size:12px; color:var(--muted); }
+    .actions { display:grid; grid-template-columns: repeat(3,1fr); gap:14px; }
+    .action { padding:19px; min-height:151px; background:var(--paper); border-top:5px solid var(--ink); display:flex; flex-direction:column; }
+    .action.coral-top { border-color:var(--coral); }.action.saffron-top{border-color:var(--saffron);}.action.cobalt-top{border-color:var(--cobalt);}
+    .action-top { display:flex; justify-content:space-between; align-items:center; font-family:"DM Mono"; text-transform:uppercase; font-size:10px; letter-spacing:.08em; }
+    .count { background:var(--ink); color:var(--paper); padding:3px 6px; }
+    .action h3 { margin:17px 0 5px; font-size:16px; line-height:1.15; }.action p { margin:0; color:var(--muted); line-height:1.42; font-size:12px; }
+    .action a { color:var(--ink); margin-top:auto; align-self:start; padding-top:13px; font-size:12px; font-weight:700; text-underline-offset:4px; }
+    .ledger { margin-top: 33px; background:var(--paper); border-top: 4px solid var(--plum); overflow:auto; }
+    .ledger-header { padding:17px 21px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--line); }.ledger h2 { font-size:19px; margin:0; font-family:"Playfair Display";}.ledger a{font-size:12px;color:var(--cobalt);font-weight:700;}
+    table { border-collapse:collapse; width:100%; min-width:670px; text-align:left; } th { color:var(--muted); font:10px "DM Mono"; text-transform:uppercase; letter-spacing:.08em; padding:11px 21px; } td { border-top:1px solid var(--line); padding:13px 21px; font-size:12px; } td:first-child { font-family:"DM Mono"; font-size:11px; } .status { font:10px "DM Mono"; color:#12683a; font-weight:700; }.status::before { content:""; width:6px;height:6px;border-radius:50%;display:inline-block;background:#199657;margin-right:6px; }.money{font-weight:700;white-space:nowrap;}
+    .reveal { animation: rise .55s both; }.delay-1{animation-delay:.08s}.delay-2{animation-delay:.16s}.delay-3{animation-delay:.24s}@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+    @media (max-width: 1120px) { main{padding:0 26px 35px}.period-grid{grid-template-columns:repeat(2,1fr)}.period.today{grid-column:span 2}.story-grid{grid-template-columns:1.2fr .8fr}.spotlight{grid-column:span 2;min-height:190px}.spotlight-shape{bottom:-50px}.stock-number{margin-top:25px}.actions{grid-template-columns:1fr 1fr}.action:last-child{grid-column:span 2} }
+    @media (max-width: 730px) { .app-shell{display:block}.sidebar{padding:15px 18px;min-height:auto;display:block}.logo{border:0;padding:0}.logo span,.owner-card,.nav-label{display:none}nav{padding:16px 0 0;display:flex;gap:4px;overflow:auto}.nav-item{white-space:nowrap;padding:7px 9px;font-size:12px}.nav-icon{display:none}main{padding:0 17px 28px}.topbar{min-height:63px}.location{font-size:11px}.date{display:none}.live{padding:7px;font-size:9px}.intro{padding:29px 0 24px;display:block}.intro p{margin-top:17px;font-size:14px}.period-grid{grid-template-columns:1fr;gap:9px}.period.today{grid-column:auto;min-height:205px}.period{min-height:147px}.period .amount{font-size:39px}.story-grid{grid-template-columns:1fr;gap:9px;margin-top:9px}.panel{min-height:230px}.spotlight{grid-column:auto;min-height:210px}.actions-title{margin-top:29px;display:block}.actions-title p{margin-top:5px}.actions{grid-template-columns:1fr;gap:9px}.action:last-child{grid-column:auto}.action{min-height:137px}.ledger{margin-top:26px}.ledger-header{padding:15px}.ledger-header h2{font-size:18px}th,td{padding-left:15px;padding-right:15px} }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Main navigation">
+      <div class="logo"><span class="mark" aria-hidden="true"></span><div><b>Gem &amp; Crystal</b><span>Fashion Hub</span></div></div>
+      <nav>
+        <span class="nav-label">Owner’s desk</span>
+        <a class="nav-item active" href="#pulse"><span class="nav-icon">01</span>Business pulse</a>
+        <a class="nav-item" href="#actions"><span class="nav-icon">02</span>Orders &amp; delivery</a>
+        <a class="nav-item" href="#transactions"><span class="nav-icon">03</span>Sales ledger</a>
+        <a class="nav-item" href="#stock"><span class="nav-icon">04</span>Stock room</a>
+        <a class="nav-item" href="#customers"><span class="nav-icon">05</span>Customers</a>
+      </nav>
+      <div class="owner-card"><span class="avatar">AO</span><div><b>Amara Ochieng</b><small>Store owner</small></div></div>
+    </aside>
+    <main id="pulse">
+      <header class="topbar"><div class="location"><span class="pin">⌖</span>Roysambu boutique, Nairobi</div><div class="topbar-actions"><span class="date">Sunday · 14 September 2026</span><button class="live">● live store</button></div></header>
+      <section class="intro reveal"><div><h1>Business <em>pulse.</em></h1></div><p>Good morning, Amara. Today begins clean: every shilling and urgent task has its place.</p></section>
+      <section class="period-grid" aria-label="Sales by period">
+        <article class="period today reveal delay-1"><span class="eyebrow">Today / 14 Sep</span><strong class="amount">KES 0</strong><small>Sales confirmed since midnight</small></article>
+        <article class="period yesterday reveal delay-1"><span class="eyebrow">Yesterday</span><strong class="amount">KES 12,480</strong><small>18 confirmed orders</small></article>
+        <article class="period week reveal delay-2"><span class="eyebrow">Last 7 days</span><strong class="amount">KES 78,620</strong><small>Up 12% from the week before</small></article>
+        <article class="period month reveal delay-3"><span class="eyebrow">Last 30 days</span><strong class="amount">KES 302,180</strong><small>112 completed customer orders</small></article>
+      </section>
+      <section class="story-grid">
+        <article class="panel trend reveal delay-1"><div class="panel-head"><div><span class="section-kicker">7-day rhythm</span><h2>Sales built up beautifully</h2></div><span class="subtle">KES 78,620</span></div><div class="trend-lines" aria-label="Sales increasing through the past seven days"><span class="bar" style="height:35%"></span><span class="bar" style="height:51%"></span><span class="bar" style="height:43%"></span><span class="bar" style="height:67%"></span><span class="bar" style="height:54%"></span><span class="bar" style="height:89%"></span><span class="bar today-bar" style="height:30%"></span></div><div class="days"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Today</span></div></article>
+        <article class="panel fulfillment reveal delay-2"><div class="panel-head"><div><span class="section-kicker">Fulfilment</span><h2>Orders moving</h2></div><span class="subtle">Today</span></div><div class="donut"><div><b>8</b><span>orders</span></div></div><div class="key"><span><i></i>6 ready</span><span><i class="coral-key"></i>2 due today</span></div></article>
+        <article class="panel spotlight reveal delay-3" id="stock"><span class="section-kicker">Stock spotlight</span><div class="stock-number">3</div><strong>Crystal Signature Handbags left in stock</strong><span class="stock-tag">REORDER THIS WEEK</span><span class="spotlight-shape" aria-hidden="true"></span></article>
+      </section>
+      <section id="actions"><div class="actions-title"><h2>What needs your eye</h2><p>A short, useful list for the shop floor.</p></div><div class="actions">
+        <article class="action coral-top reveal delay-1"><div class="action-top"><span>Deliveries</span><span class="count">02</span></div><h3>Two customer deliveries are due today.</h3><p>Confirm the preferred drop-off time with Esther and Wanjiku before 10:00 AM.</p><a href="#transactions">Review deliveries →</a></article>
+        <article class="action saffron-top reveal delay-2"><div class="action-top"><span>Follow-ups</span><span class="count">03</span></div><h3>Three carts deserve a personal follow-up.</h3><p>They include items that are running low, so a warm message may help close the sale.</p><a href="#customers">See customer notes →</a></article>
+        <article class="action cobalt-top reveal delay-3"><div class="action-top"><span>Revenue note</span><span class="count">+12%</span></div><h3>Saturday was your strongest day this month.</h3><p>Handbags and denim together contributed KES 22,910 — keep both visible this week.</p><a href="#transactions">Open sales detail →</a></article>
+      </div></section>
+      <section class="ledger reveal delay-3" id="transactions"><div class="ledger-header"><h2>Recent, confirmed sales</h2><a href="#transactions">View full ledger →</a></div><table><thead><tr><th>Receipt</th><th>Customer</th><th>Channel</th><th>Status</th><th>Amount</th></tr></thead><tbody><tr><td>GC-POS-618A93</td><td>John Kamau</td><td>In store / M-PESA</td><td><span class="status">Confirmed</span></td><td class="money">KES 5,000</td></tr><tr><td>GC-ORD-17092</td><td>Esther Wanjiru</td><td>Website</td><td><span class="status">Confirmed</span></td><td class="money">KES 8,580</td></tr><tr><td>GC-POS-5D2C1F</td><td>Brian Otieno</td><td>In store / Cash</td><td><span class="status">Confirmed</span></td><td class="money">KES 3,900</td></tr></tbody></table></section>
+    </main>
+  </div>
+</body>
+</html>

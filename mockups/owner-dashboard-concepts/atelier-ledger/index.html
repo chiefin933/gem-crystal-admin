@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Gem & Crystal owner dashboard concept — The Atelier Ledger." />
+    <title>Atelier Ledger — Gem & Crystal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Playfair+Display:opsz,wght@5..1200,500;5..1200,600;5..1200,700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --paper: #f5f1e9;
+        --paper-deep: #ebe5da;
+        --ink: #1e1c1a;
+        --muted: #77716a;
+        --rule: #cbc4b8;
+        --rule-dark: #8d857b;
+        --wine: #7a142d;
+        --wine-pale: #f0e3e4;
+        --pine: #0e6654;
+        --pine-pale: #dcece5;
+        --amber: #a65d12;
+        --amber-pale: #f5e7d7;
+        --rail: #221e1c;
+        --rail-muted: #b7afa5;
+        --rail-rule: #514b46;
+        --serif: "Playfair Display", Georgia, serif;
+        --sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+        --mono: "DM Mono", ui-monospace, monospace;
+      }
+
+      * { box-sizing: border-box; }
+      html { background: var(--paper); }
+      body { margin: 0; color: var(--ink); font-family: var(--sans); background: var(--paper); }
+      button, a { font: inherit; }
+      button:focus-visible, a:focus-visible { outline: 3px solid var(--wine); outline-offset: 3px; }
+      .shell { min-height: 100vh; display: grid; grid-template-columns: 238px minmax(0, 1fr); }
+
+      .rail { min-height: 100vh; padding: 28px 20px 22px; background: var(--rail); color: #f5f1e9; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
+      .brand { text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px; padding: 2px 5px 29px; border-bottom: 1px solid var(--rail-rule); }
+      .brand-mark { width: 30px; height: 30px; position: relative; display: grid; place-items: center; border: 1px solid #d4c7b6; transform: rotate(45deg); }
+      .brand-mark span { font-family: var(--serif); font-size: 17px; line-height: 1; transform: rotate(-45deg); }
+      .brand-name { font-family: var(--serif); font-size: 18px; letter-spacing: -.04em; }
+      .brand-sub { display: block; color: var(--rail-muted); font-size: 9px; letter-spacing: .15em; text-transform: uppercase; margin-top: 2px; }
+      .nav-group { padding: 27px 0 0; }
+      .nav-label, .eyebrow { font-family: var(--mono); font-size: 10px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; }
+      .nav-label { color: #a8a097; padding: 0 9px 10px; }
+      nav a { display: flex; justify-content: space-between; align-items: center; color: #ded7cd; text-decoration: none; padding: 10px 9px; margin: 1px 0; font-size: 13px; border-left: 2px solid transparent; }
+      nav a:hover { background: #302b27; }
+      nav a.active { color: #fffaf3; background: #37231f; border-left-color: #c45662; font-weight: 600; }
+      .nav-count { color: #d6c1b8; background: #49302f; font-family: var(--mono); font-size: 10px; min-width: 21px; text-align: center; padding: 2px 4px; }
+      .rail-spacer { flex: 1; min-height: 20px; }
+      .owner { border-top: 1px solid var(--rail-rule); padding: 18px 5px 0; display: flex; gap: 10px; align-items: center; }
+      .owner-seal { width: 30px; height: 30px; border-radius: 50%; background: #e5d2bd; color: var(--rail); display: grid; place-items: center; font-family: var(--serif); font-size: 16px; }
+      .owner p { margin: 0; line-height: 1.25; }
+      .owner strong { display: block; font-size: 12px; font-weight: 600; }
+      .owner span { font-size: 10px; color: var(--rail-muted); }
+
+      main { max-width: 1500px; width: 100%; margin: 0 auto; padding: 42px 52px 50px; }
+      .topline { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; border-bottom: 1px solid var(--rule-dark); padding-bottom: 33px; }
+      .topline h1 { font-family: var(--serif); font-size: clamp(34px, 3.4vw, 52px); font-weight: 600; letter-spacing: -.055em; line-height: 1; margin: 7px 0 0; }
+      .date { color: var(--muted); font-size: 13px; margin: 0; }
+      .live-note { align-self: end; max-width: 355px; padding: 9px 0 9px 13px; border-left: 2px solid var(--pine); color: #4f544f; font-size: 12px; line-height: 1.5; }
+      .live-note b { color: var(--pine); font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+      .review-button { flex: 0 0 auto; appearance: none; cursor: pointer; border: 0; background: var(--wine); color: #fff9f4; padding: 12px 18px; font-size: 12px; font-weight: 600; letter-spacing: .025em; box-shadow: inset 0 -2px rgba(0,0,0,.15); transition: background .18s ease, transform .18s ease; }
+      .review-button:hover { background: #561020; transform: translateY(-1px); }
+
+      .hero { display: grid; grid-template-columns: minmax(340px, 1.18fr) minmax(520px, 1fr); gap: 48px; padding: 48px 0 42px; border-bottom: 1px solid var(--rule); }
+      .hero-title { color: var(--muted); margin: 0 0 13px; }
+      .amount { font-family: var(--serif); font-size: clamp(58px, 7.6vw, 112px); letter-spacing: -.075em; line-height: .85; font-weight: 600; white-space: nowrap; }
+      .amount span { font-family: var(--sans); font-size: .28em; font-weight: 600; letter-spacing: .02em; margin-right: .14em; vertical-align: .27em; }
+      .amount-subline { display: flex; justify-content: space-between; align-items: flex-end; gap: 18px; padding-top: 20px; border-bottom: 1px solid var(--ink); padding-bottom: 9px; font-size: 12px; }
+      .amount-subline p { margin: 0; color: var(--muted); }
+      .amount-subline strong { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--pine); }
+
+      .periods { align-self: end; }
+      .periods header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--rule-dark); padding-bottom: 9px; }
+      .periods h2, .module h2 { margin: 0; font-family: var(--serif); font-size: 22px; letter-spacing: -.035em; font-weight: 600; }
+      .periods header span { color: var(--muted); font-size: 11px; }
+      .period-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+      .period { min-height: 145px; padding: 20px 13px 8px 0; border-right: 1px solid var(--rule); }
+      .period + .period { padding-left: 16px; }
+      .period:last-child { border-right: 0; }
+      .period .eyebrow { color: var(--muted); display: block; margin-bottom: 24px; }
+      .period strong { display: block; font-family: var(--serif); font-size: clamp(22px, 2.1vw, 31px); font-weight: 600; letter-spacing: -.055em; white-space: nowrap; }
+      .period small { display: block; margin-top: 8px; color: var(--muted); font-size: 10px; }
+      .period small.positive { color: var(--pine); }
+
+      .body-grid { display: grid; grid-template-columns: minmax(0, 1.47fr) minmax(320px, .93fr); gap: 48px; padding: 42px 0; }
+      .module { border-top: 2px solid var(--ink); }
+      .module-heading { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 0 19px; }
+      .module-heading a { color: var(--wine); font-size: 11px; font-weight: 600; text-decoration: none; border-bottom: 1px solid currentColor; }
+      .module-heading a:hover { color: #46101d; }
+      .rhythm { padding-bottom: 5px; }
+      .rhythm-meta { color: var(--muted); font-size: 11px; margin: -9px 0 23px; }
+      .chart { height: 212px; padding: 0 2px 0 0; display: grid; grid-template-columns: repeat(7, 1fr); align-items: end; gap: clamp(12px, 2vw, 25px); background: repeating-linear-gradient(to bottom, transparent 0, transparent 51px, var(--rule) 52px, transparent 53px); }
+      .day { height: 100%; display: flex; flex-direction: column; justify-content: end; min-width: 0; }
+      .bar-wrap { height: 170px; display: flex; align-items: end; position: relative; }
+      .bar { width: 100%; min-width: 18px; background: #b6afa5; transition: background .2s ease, transform .2s ease; position: relative; }
+      .bar:hover { background: var(--wine); transform: translateY(-3px); }
+      .bar.active { background: var(--wine); }
+      .bar b { position: absolute; bottom: calc(100% + 7px); left: 50%; transform: translateX(-50%); font-family: var(--mono); font-size: 9px; white-space: nowrap; font-weight: 500; }
+      .day label { border-top: 1px solid var(--ink); padding-top: 8px; font-family: var(--mono); font-size: 10px; color: var(--muted); }
+      .day.active label { color: var(--wine); font-weight: 500; }
+      .chart-legend { display: flex; justify-content: space-between; color: var(--muted); font-size: 10px; margin-top: 10px; }
+
+      .worklist { border-top: 2px solid var(--wine); }
+      .worklist .module-heading { border-bottom: 1px solid var(--rule-dark); }
+      .work-item { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 11px; align-items: start; padding: 17px 0; border-bottom: 1px solid var(--rule); }
+      .item-code { font-family: var(--mono); font-size: 10px; color: var(--muted); padding-top: 3px; }
+      .item-title { display: block; font-size: 13px; font-weight: 600; line-height: 1.25; }
+      .item-detail { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; line-height: 1.4; }
+      .tag { font-family: var(--mono); font-size: 9px; letter-spacing: .06em; text-transform: uppercase; padding: 4px 6px; white-space: nowrap; }
+      .tag.delivery { color: #86480b; background: var(--amber-pale); }
+      .tag.stock { color: var(--wine); background: var(--wine-pale); }
+      .tag.verified { color: var(--pine); background: var(--pine-pale); }
+      .receipt { margin-top: 20px; padding: 18px 0 0; border-top: 1px solid var(--rule-dark); }
+      .receipt-top { display: flex; justify-content: space-between; align-items: start; gap: 10px; }
+      .receipt .eyebrow { color: var(--pine); }
+      .receipt-number { font-family: var(--mono); color: var(--pine); font-size: 11px; margin-top: 3px; }
+      .receipt-value { font-family: var(--serif); font-size: 25px; letter-spacing: -.04em; font-weight: 600; }
+      .receipt footer { display: flex; justify-content: space-between; padding-top: 13px; color: var(--muted); font-size: 10px; }
+
+      .ledger-footer { display: flex; justify-content: space-between; align-items: center; gap: 20px; border-top: 1px solid var(--rule-dark); padding-top: 17px; color: var(--muted); font-family: var(--mono); font-size: 9px; line-height: 1.5; letter-spacing: .05em; text-transform: uppercase; }
+      .ledger-footer span:last-child { text-align: right; }
+
+      @media (max-width: 1050px) {
+        .shell { grid-template-columns: 204px minmax(0, 1fr); }
+        main { padding: 32px 32px 42px; }
+        .hero, .body-grid { gap: 30px; }
+        .hero { grid-template-columns: 1fr; }
+        .periods { max-width: 760px; }
+      }
+      @media (max-width: 740px) {
+        .shell { display: block; }
+        .rail { min-height: auto; height: auto; position: static; padding: 16px 20px; }
+        .brand { padding-bottom: 14px; border: 0; }
+        .brand-sub, .nav-group, .owner { display: none; }
+        .rail-spacer { display: none; }
+        main { padding: 27px 20px 32px; }
+        .topline { display: grid; grid-template-columns: 1fr auto; padding-bottom: 24px; }
+        .topline > div:first-child { grid-column: 1 / -1; }
+        .topline h1 { font-size: 38px; }
+        .live-note { grid-column: 1 / -1; align-self: auto; max-width: none; }
+        .review-button { align-self: start; padding: 10px 12px; font-size: 11px; }
+        .hero { padding: 35px 0 31px; gap: 36px; }
+        .amount { font-size: clamp(53px, 17vw, 77px); }
+        .period-grid { grid-template-columns: 1fr; border-top: 1px solid var(--rule); }
+        .period { min-height: auto; padding: 14px 0; border-bottom: 1px solid var(--rule); border-right: 0; display: grid; grid-template-columns: 1.2fr 1fr auto; align-items: center; gap: 7px; }
+        .period + .period { padding-left: 0; }
+        .period .eyebrow { margin: 0; }
+        .period small { margin: 0; text-align: right; }
+        .body-grid { grid-template-columns: 1fr; padding-top: 31px; }
+        .chart { gap: 8px; }
+        .bar b { font-size: 8px; transform: translateX(-50%) rotate(-45deg); transform-origin: center bottom; }
+        .ledger-footer { display: block; }
+        .ledger-footer span { display: block; }
+        .ledger-footer span:last-child { text-align: left; margin-top: 5px; }
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        .hero > *, .module { animation: settle .55s ease both; }
+        .hero > *:nth-child(2) { animation-delay: .11s; }
+        .body-grid .module:nth-child(2) { animation-delay: .18s; }
+        @keyframes settle { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="rail" aria-label="Owner navigation">
+        <a class="brand" href="#overview" aria-label="Gem and Crystal overview">
+          <span class="brand-mark" aria-hidden="true"><span>G</span></span>
+          <span><span class="brand-name">Gem &amp; Crystal</span><span class="brand-sub">Fashion House</span></span>
+        </a>
+        <nav class="nav-group" aria-label="Store operations">
+          <p class="nav-label">The store</p>
+          <a class="active" href="#overview" aria-current="page">Overview <span aria-hidden="true">↗</span></a>
+          <a href="#orders">Orders <span class="nav-count">3</span></a>
+          <a href="#catalogue">Catalogue <span aria-hidden="true">→</span></a>
+          <a href="#inventory">Inventory <span class="nav-count">2</span></a>
+        </nav>
+        <nav class="nav-group" aria-label="Business records">
+          <p class="nav-label">The ledger</p>
+          <a href="#payments">Payments <span aria-hidden="true">→</span></a>
+          <a href="#customers">Customers <span aria-hidden="true">→</span></a>
+          <a href="#reports">Reports <span aria-hidden="true">→</span></a>
+        </nav>
+        <div class="rail-spacer"></div>
+        <div class="owner">
+          <span class="owner-seal" aria-hidden="true">K</span>
+          <p><strong>Kiongozi Okopa</strong><span>Owner · Nairobi</span></p>
+        </div>
+      </aside>
+
+      <main id="overview">
+        <header class="topline">
+          <div>
+            <p class="date">Sunday, 14 September 2026</p>
+            <h1>Good morning, Kiongozi.</h1>
+          </div>
+          <p class="live-note"><b>Live ledger</b><br />No completed sales yet today. Your shop is ready when your first customer is.</p>
+          <button class="review-button" type="button">Review orders <span aria-hidden="true">→</span></button>
+        </header>
+
+        <section class="hero" aria-labelledby="sales-title">
+          <div>
+            <p class="eyebrow hero-title" id="sales-title">Today’s completed sales</p>
+            <div class="amount"><span>KES</span>0</div>
+            <div class="amount-subline">
+              <p>Since midnight · Nairobi</p>
+              <strong>0 verified payments</strong>
+            </div>
+          </div>
+          <section class="periods" aria-labelledby="period-title">
+            <header><h2 id="period-title">The wider picture</h2><span>Completed only</span></header>
+            <div class="period-grid">
+              <article class="period"><span class="eyebrow">Yesterday</span><strong>KES 18,450</strong><small class="positive">↑ 14% from Friday</small></article>
+              <article class="period"><span class="eyebrow">Last 7 days</span><strong>KES 112,680</strong><small>38 orders fulfilled</small></article>
+              <article class="period"><span class="eyebrow">Last 30 days</span><strong>KES 486,240</strong><small class="positive">↑ 9% from prior 30 days</small></article>
+            </div>
+          </section>
+        </section>
+
+        <section class="body-grid" aria-label="Store health">
+          <section class="module rhythm" aria-labelledby="rhythm-title">
+            <div class="module-heading"><h2 id="rhythm-title">Revenue rhythm</h2><a href="#reports">View monthly ledger</a></div>
+            <p class="rhythm-meta">Seven completed trading days · KES</p>
+            <div class="chart" role="img" aria-label="Revenue for the past seven days: Monday 12,400, Tuesday 17,980, Wednesday 9,200, Thursday 15,720, Friday 16,930, Saturday 21,500, Sunday 18,450.">
+              <div class="day"><div class="bar-wrap"><div class="bar" style="height:58%"><b>12,400</b></div></div><label>Mon</label></div>
+              <div class="day"><div class="bar-wrap"><div class="bar" style="height:84%"><b>17,980</b></div></div><label>Tue</label></div>
+              <div class="day"><div class="bar-wrap"><div class="bar" style="height:43%"><b>9,200</b></div></div><label>Wed</label></div>
+              <div class="day"><div class="bar-wrap"><div class="bar" style="height:73%"><b>15,720</b></div></div><label>Thu</label></div>
+              <div class="day"><div class="bar-wrap"><div class="bar" style="height:79%"><b>16,930</b></div></div><label>Fri</label></div>
+              <div class="day"><div class="bar-wrap"><div class="bar" style="height:100%"><b>21,500</b></div></div><label>Sat</label></div>
+              <div class="day active"><div class="bar-wrap"><div class="bar active" style="height:86%"><b>18,450</b></div></div><label>Sun</label></div>
+            </div>
+            <div class="chart-legend"><span>Highest: Sat · KES 21,500</span><span>7-day total: KES 112,680</span></div>
+          </section>
+
+          <section class="module worklist" aria-labelledby="work-title">
+            <div class="module-heading"><h2 id="work-title">Needs your eye</h2><a href="#orders">Open worklist</a></div>
+            <article class="work-item">
+              <span class="item-code">01</span><div><span class="item-title">Delivery requested for Tuesday</span><span class="item-detail">Order GC-4821 · Rose tailored blazer · Karen</span></div><span class="tag delivery">Delivery</span>
+            </article>
+            <article class="work-item">
+              <span class="item-code">02</span><div><span class="item-title">Only 2 left: Crystal signature handbag</span><span class="item-detail">Black leather · reorder before Wednesday</span></div><span class="tag stock">Low stock</span>
+            </article>
+            <article class="work-item">
+              <span class="item-code">03</span><div><span class="item-title">Delivery address needs confirmation</span><span class="item-detail">Order GC-4817 · customer asked for a different date</span></div><span class="tag delivery">Delivery</span>
+            </article>
+            <section class="receipt" aria-labelledby="receipt-title">
+              <div class="receipt-top"><div><p class="eyebrow" id="receipt-title">Latest verified M-PESA</p><p class="receipt-number">UJD03QESU</p></div><strong class="receipt-value">KES 5,490</strong></div>
+              <footer><span>John M. · Till payment</span><span>Yesterday, 6:42 PM</span></footer>
+            </section>
+          </section>
+        </section>
+
+        <footer class="ledger-footer"><span>Gem &amp; Crystal · Owner’s daily ledger</span><span>All amounts in Kenyan shillings · Last refreshed 08:17 EAT</span></footer>
+      </main>
+    </div>
+  </body>
+</html>
