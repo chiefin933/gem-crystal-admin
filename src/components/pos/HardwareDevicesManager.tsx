@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Tablet, Scan, Fingerprint, Printer, ShieldAlert, CheckCircle2, RefreshCw, Smartphone } from 'lucide-react';
-import { getAuthHeader } from '../../api/adminApi';
+import { API_BASE, getAuthHeader } from '../../api/adminApi';
 
 export const HardwareDevicesManager: React.FC = () => {
   const [hardware, setHardware] = useState<any>(null);
@@ -16,8 +16,8 @@ export const HardwareDevicesManager: React.FC = () => {
     setLoading(true);
     try {
       const [hwRes, setRes] = await Promise.all([
-        fetch('/api/pos/hardware', { headers: getAuthHeader() }).then(r => r.json()),
-        fetch('/api/settings').then(r => r.json()),
+        fetch(`${API_BASE}/pos/hardware`, { headers: getAuthHeader() }).then(r => r.json()),
+        fetch(`${API_BASE}/settings`).then(r => r.json()),
       ]);
       setHardware(hwRes);
       setSettings(setRes);
@@ -38,7 +38,7 @@ export const HardwareDevicesManager: React.FC = () => {
     e.preventDefault();
     setSaveStatus('Saving...');
     try {
-      const res = await fetch('/api/settings', {
+      const res = await fetch(`${API_BASE}/settings`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

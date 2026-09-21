@@ -1,4 +1,4 @@
-const API_BASE = '/api';
+export const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '') || '/api';
 let authToken: string | null = null;
 
 export function setAuthToken(token: string | null): void {
@@ -240,7 +240,7 @@ export async function resolveUnmatchedPayment(
   id: string,
   action: 'ASSIGNED' | 'IGNORED',
   note: string,
-  targetType?: 'ORDER' | 'POS_SALE',
+  targetType?: 'ORDER' | 'POS_SALE' | 'CHECKOUT_SESSION',
   targetRef?: string,
 ) {
   return apiRequest<{ success: boolean }>(`/orders/unmatched-payments/${id}/resolve`, {

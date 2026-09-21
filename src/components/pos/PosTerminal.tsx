@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchProducts } from '../../api/adminApi';
+import { API_BASE, fetchProducts } from '../../api/adminApi';
 import {
   Scan,
   Fingerprint,
@@ -138,7 +138,7 @@ export const PosTerminal: React.FC = () => {
     }
 
     try {
-      const res = await fetch('/api/pos/auth-request', {
+      const res = await fetch(`${API_BASE}/pos/auth-request`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -229,7 +229,7 @@ export const PosTerminal: React.FC = () => {
     let cancelled = false;
     const pollPayments = async () => {
       try {
-        const response = await fetch('/api/pos/payment-notifications', {
+        const response = await fetch(`${API_BASE}/pos/payment-notifications`, {
           headers: { Authorization: `Bearer ${posSessionToken}` },
         });
         if (!response.ok) return;
@@ -322,7 +322,7 @@ export const PosTerminal: React.FC = () => {
 
     setIsProcessing(true);
     try {
-      const res = await fetch('/api/pos/checkout', {
+      const res = await fetch(`${API_BASE}/pos/checkout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -39,9 +39,9 @@ export const UnmatchedPaymentsManager: React.FC = () => {
   };
 
   const handleAssign = async (id: string, receipt: string, amount: number) => {
-    const targetType = window.prompt('Assign to ORDER or POS_SALE?')?.toUpperCase() as 'ORDER' | 'POS_SALE' | null;
-    if (!targetType || !['ORDER', 'POS_SALE'].includes(targetType)) return;
-    const targetRef = window.prompt(`Enter the ${targetType === 'ORDER' ? 'order number' : 'receipt number'}:`);
+    const targetType = window.prompt('Assign to ORDER, POS_SALE or CHECKOUT_SESSION?')?.toUpperCase() as 'ORDER' | 'POS_SALE' | 'CHECKOUT_SESSION' | null;
+    if (!targetType || !['ORDER', 'POS_SALE', 'CHECKOUT_SESSION'].includes(targetType)) return;
+    const targetRef = window.prompt(`Enter the ${targetType === 'CHECKOUT_SESSION' ? 'checkout reference (GC-PAY-...)' : targetType === 'ORDER' ? 'order number' : 'receipt number'}:`);
     if (!targetRef) return;
     const note = window.prompt(`Note: assigning M-PESA ${receipt} (KES ${amount}) to ${targetType} ${targetRef}:`, 'Manual assignment by owner');
     if (!note) return;
