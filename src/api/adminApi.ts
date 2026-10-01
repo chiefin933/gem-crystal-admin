@@ -1,4 +1,14 @@
 export const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '') || '/api';
+
+export class ApiRequestError extends Error {
+  constructor(
+    public readonly status: number,
+    public readonly code: string,
+    message: string,
+    public readonly details: Record<string, unknown> = {},
+  ) { super(message); }
+}
+
 let authToken: string | null = null;
 
 export function setAuthToken(token: string | null): void {
@@ -20,8 +30,10 @@ async function apiRequest<T>(endpoint: string, options?: RequestInit): Promise<T
   });
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: 'Request failed' }));
-    throw new Error(typeof err.error === 'string' ? err.error : err.error?.message || `HTTP ${res.status}`);
+    const payload: any = await res.json().catch(() => ({ error: 'Request failed' }));
+    const error = typeof payload.error === 'object' && payload.error ? payload.error : {};
+    const message = typeof payload.error === 'string' ? payload.error : error.message || `HTTP ${res.status}`;
+    throw new ApiRequestError(res.status, error.code || 'REQUEST_FAILED', message, error);
   }
 
   return res.json();
@@ -29,14 +41,38 @@ async function apiRequest<T>(endpoint: string, options?: RequestInit): Promise<T
 
 // ──────── Admin Auth ───────────────────────────────────────────────────────
 
-export async function loginAdmin(email: string, password: string) {
+export async function loginAdmin(email: string, password: string, mfaCode?: string) {
   return apiRequest<{
     token: string;
-    admin: { id: string; email: string; name: string; role: 'OWNER' | 'CASHIER' };
+    admin: { id: string; email: string; name: string; role: 'OWNER' | 'CASHIER'; mfaEnabled: boolean };
   }>('/admin/login', {
     method: 'POST',
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, ...(mfaCode ? { mfaCode } : {}) }),
   });
+}
+
+export async function startMfaSetup(setupToken: string) {
+  return apiRequest<{ success: true; secret: string; otpauthUri: string; message: string }>('/admin/mfa/setup/start', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${setupToken}` },
+    body: '{}',
+  });
+}
+
+export async function confirmMfaSetup(setupToken: string, code: string) {
+  return apiRequest<{
+    token: string;
+    admin: { id: string; email: string; name: string; role: 'OWNER' | 'CASHIER'; mfaEnabled: boolean };
+    recoveryCodes: string[];
+  }>('/admin/mfa/setup/confirm', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${setupToken}` },
+    body: JSON.stringify({ code }),
+  });
+}
+
+export async function logoutAdmin(): Promise<void> {
+  await apiRequest('/admin/logout', { method: 'POST', body: '{}' });
 }
 
 export async function fetchAdminMe() {

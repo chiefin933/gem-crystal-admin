@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Shield, Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
+import { Shield, Lock, Mail, ArrowRight, AlertCircle, KeyRound } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
-  const { login } = useAuth();
+  const { login, mfaSetup, confirmMfaSetup } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [mfaCode, setMfaCode] = useState('');
+  const [needsMfa, setNeedsMfa] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -15,7 +17,16 @@ export const LoginPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      await login(email, password);
+      if (mfaSetup) {
+        await confirmMfaSetup(mfaCode);
+        return;
+      }
+      const result = await login(email, password, needsMfa ? mfaCode : undefined);
+      if (result === 'mfa-required') {
+        setNeedsMfa(true);
+        setMfaCode('');
+        setError('Enter your authenticator code or one unused recovery code.');
+      }
     } catch (err: any) {
       setError(err.message || 'Invalid admin credentials');
     } finally {
@@ -90,6 +101,45 @@ export const LoginPage: React.FC = () => {
               </div>
             </div>
 
+            {mfaSetup && (
+              <div className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-4">
+                <p className="text-sm font-semibold text-amber-200">
+                  Authenticator setup is required
+                </p>
+                <p className="mt-2 text-xs leading-relaxed text-zinc-400">
+                  Enter this key manually in Google Authenticator, Microsoft Authenticator, 1Password, or another TOTP app.
+                </p>
+                <code className="mt-3 block break-all rounded-lg bg-zinc-950 p-3 text-center font-mono text-sm tracking-wider text-amber-300">
+                  {mfaSetup.secret}
+                </code>
+                <p className="mt-2 text-xs text-rose-300">
+                  Never send this key to anyone or save it in chat.
+                </p>
+              </div>
+            )}
+
+            {(needsMfa || mfaSetup) && (
+              <div>
+                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
+                  {mfaSetup ? 'Confirm Authenticator Code' : 'Authenticator or Recovery Code'}
+                </label>
+                <div className="relative">
+                  <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    required
+                    value={mfaCode}
+                    onChange={e => setMfaCode(e.target.value.trim())}
+                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-rose-500 rounded-xl py-3 pl-10 pr-4 text-sm font-mono tracking-widest text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-rose-500 transition"
+                    placeholder="123456 or recovery code"
+                  />
+                </div>
+              </div>
+            )}
+
+
             <button
               type="submit"
               disabled={isSubmitting}
@@ -99,7 +149,7 @@ export const LoginPage: React.FC = () => {
                 <span className="inline-block w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  <span>Sign In to Store Panel</span>
+                  <span>{mfaSetup ? 'Enable MFA and Continue' : needsMfa ? 'Verify and Sign In' : 'Sign In to Store Panel'}</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </>
               )}

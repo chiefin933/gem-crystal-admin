@@ -2,9 +2,10 @@ import React from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { RecoveryCodesPage } from './pages/RecoveryCodesPage';
 
 const AppContent: React.FC = () => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, recoveryCodes } = useAuth();
 
   if (isLoading) {
     return (
@@ -16,6 +17,8 @@ const AppContent: React.FC = () => {
       </div>
     );
   }
+
+  if (recoveryCodes.length > 0) return <RecoveryCodesPage />;
 
   return user ? <DashboardPage /> : <LoginPage />;
 };
