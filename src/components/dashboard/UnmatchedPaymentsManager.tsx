@@ -5,17 +5,20 @@ import { AlertTriangle, CheckCircle2, XCircle, RefreshCw, ChevronLeft, ChevronRi
 export const UnmatchedPaymentsManager: React.FC = () => {
   const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ total: 0, totalPages: 1 });
   const [resolving, setResolving] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await fetchUnmatchedPayments();
       setPayments(res.data);
       setPagination(res.pagination);
     } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to load unmatched payments.');
       console.error(err);
     } finally {
       setLoading(false);
@@ -76,7 +79,11 @@ export const UnmatchedPaymentsManager: React.FC = () => {
         </button>
       </div>
 
-      {loading ? (
+      {error ? (
+        <div role="alert" className="rounded-2xl border border-rose-500/60 bg-rose-950/40 p-6 text-sm font-semibold text-rose-100">
+          {error} Use Refresh after confirming the API is online.
+        </div>
+      ) : loading ? (
         <div className="p-12 text-center text-xs text-zinc-500">Loading unmatched payments...</div>
       ) : payments.length === 0 ? (
         <div className="p-12 text-center">
