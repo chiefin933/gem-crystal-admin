@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { fetchUnmatchedPayments, resolveUnmatchedPayment } from '../../api/adminApi';
-import { AlertTriangle, CheckCircle2, XCircle, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { fetchUnmatchedPayments, registerC2BCallbackUrls, resolveUnmatchedPayment } from '../../api/adminApi';
+import { AlertTriangle, CheckCircle2, XCircle, RefreshCw, ChevronLeft, ChevronRight, Link2 } from 'lucide-react';
 
 export const UnmatchedPaymentsManager: React.FC = () => {
   const [payments, setPayments] = useState<any[]>([]);
@@ -9,6 +9,8 @@ export const UnmatchedPaymentsManager: React.FC = () => {
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({ total: 0, totalPages: 1 });
   const [resolving, setResolving] = useState<string | null>(null);
+  const [registeringCallbacks, setRegisteringCallbacks] = useState(false);
+  const [registrationMessage, setRegistrationMessage] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -26,6 +28,20 @@ export const UnmatchedPaymentsManager: React.FC = () => {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  const handleRegisterCallbacks = async () => {
+    if (!window.confirm('Register the configured confirmation and validation URLs with Daraja now? In the sandbox, do this before each simulation.')) return;
+    setRegisteringCallbacks(true);
+    setRegistrationMessage(null);
+    try {
+      const response = await registerC2BCallbackUrls();
+      setRegistrationMessage(response.result.ResponseDescription || 'Callback URLs registered successfully.');
+    } catch (err) {
+      setRegistrationMessage(err instanceof Error ? err.message : 'Callback URL registration failed.');
+    } finally {
+      setRegisteringCallbacks(false);
+    }
+  };
 
   const handleIgnore = async (id: string) => {
     const note = window.prompt('Reason for ignoring this payment:');
@@ -72,12 +88,25 @@ export const UnmatchedPaymentsManager: React.FC = () => {
             Review each one and assign or ignore. — {pagination.total} pending
           </p>
         </div>
-        <button onClick={load}
-          className="bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-300 text-xs font-semibold px-4 py-2.5 rounded-xl transition flex items-center gap-2">
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <button onClick={handleRegisterCallbacks} disabled={registeringCallbacks}
+            className="bg-emerald-950 border border-emerald-800 hover:bg-emerald-900 text-emerald-200 text-xs font-semibold px-4 py-2.5 rounded-xl transition flex items-center gap-2 disabled:opacity-50">
+            <Link2 className="w-3.5 h-3.5" />
+            {registeringCallbacks ? 'Registering…' : 'Register Sandbox Callbacks'}
+          </button>
+          <button onClick={load}
+            className="bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-300 text-xs font-semibold px-4 py-2.5 rounded-xl transition flex items-center gap-2">
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+        </div>
       </div>
+
+      {registrationMessage && (
+        <div role="status" className="rounded-xl border border-sky-700 bg-sky-950/40 px-4 py-3 text-xs font-semibold text-sky-100">
+          {registrationMessage}
+        </div>
+      )}
 
       {error ? (
         <div role="alert" className="rounded-2xl border border-rose-500/60 bg-rose-950/40 p-6 text-sm font-semibold text-rose-100">

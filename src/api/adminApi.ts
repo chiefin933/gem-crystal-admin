@@ -254,6 +254,13 @@ export async function deleteCoupon(code: string) {
 
 // ──────── Unmatched Payments ───────────────────────────────────────────────
 
+export async function registerC2BCallbackUrls() {
+  return apiRequest<{
+    success: boolean;
+    result: { ResponseCode: string; ResponseDescription: string };
+  }>('/orders/mpesa-c2b-register', { method: 'POST', body: '{}' });
+}
+
 export async function fetchUnmatchedPayments() {
   return apiRequest<{
     data: Array<{

@@ -6,6 +6,7 @@ import {
   getAuthHeader,
   loginAdmin,
   logoutAdmin,
+  registerC2BCallbackUrls,
   setAuthToken,
   startMfaSetup,
 } from './adminApi';
@@ -31,6 +32,21 @@ describe('admin API authentication', () => {
     await logoutAdmin();
 
     expect(fetch).toHaveBeenCalledWith(API_BASE + '/admin/logout', expect.objectContaining({
+      method: 'POST',
+      headers: expect.objectContaining({ Authorization: 'Bearer owner-token' }),
+    }));
+  });
+
+  it('registers C2B callback URLs through the authenticated backend', async () => {
+    setAuthToken('owner-token');
+    vi.mocked(fetch).mockResolvedValue(jsonResponse({
+      success: true,
+      result: { ResponseCode: '0', ResponseDescription: 'Success' },
+    }));
+
+    await registerC2BCallbackUrls();
+
+    expect(fetch).toHaveBeenCalledWith(API_BASE + '/orders/mpesa-c2b-register', expect.objectContaining({
       method: 'POST',
       headers: expect.objectContaining({ Authorization: 'Bearer owner-token' }),
     }));
